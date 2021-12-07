@@ -2,18 +2,21 @@ function love.load()
 	love.window.setMode(800, 800, {resizable = false} )
 	xOffs = 5
 	yOffs = 250
-	--if white has to plat turn is 0, if black1
+	--if white has to play turn is 0, if black1
 	turn = 0
 	all = love.graphics.newImage("chess pieces.png")
-	wpawn = love.graphics.newQuad(1000, 0, 200, 200, all:getDimensions())
-	Piece = {x = 0, y = 0}
+	types = {love.graphics.newQuad(0, 0, 200, 200, all:getDimensions()), love.graphics.newQuad(200, 0, 200, 200, all:getDimensions()),
+	love.graphics.newQuad(400, 0, 200, 200, all:getDimensions()), love.graphics.newQuad(600, 0, 200, 200, all:getDimensions()),
+	love.graphics.newQuad(800, 0, 200, 200, all:getDimensions()), love.graphics.newQuad(1000, 0, 200, 200, all:getDimensions()) }
+	Piece = {x = 0, y = 0, dead = false, type = 5}
+	--types: 0 = king, 1 = queen, 2 = bishop, 3 = knight, 4 = rook, 5 = pawn
 
 function Piece:create (o)
   o.parent = self
   return o
 end
 
-function Point:move (p)
+function Piece:move (p)
   self.x = self.x + p.x
   self.y = self.y + p.y
 end
@@ -21,13 +24,13 @@ end
 --
 -- creating points
 --
-p1 = Point:create{x = 10, y = 20}
-p2 = Point:create{x = 10}  -- y will be inherited until it is set
+p1 = Piece:create{x = 2, y = 2}
+p2 = Piece:create{x = 10}  -- y will be inherited until it is set
 
 --
 -- example of a method invocation
 --
-p1:move(p2)
+--p1:move(p2)
 end
 
 function love.update(dt)
@@ -50,6 +53,6 @@ function love.draw()
 	love.graphics.setColor(1, 1, 1)
 	--draw white pawns
 	for i = 0, 7 do
-		love.graphics.draw(all, wpawn, xOffs + i * 50, yOffs + 6 * 50, turn * 180, 0.25, 0.25)
+		love.graphics.draw(all, types[6], xOffs + p1.x * 50, yOffs + p1.y * 50, --[[turn * 180--]]0, 0.25, 0.25)
 	end
 end
