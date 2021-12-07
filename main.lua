@@ -6,7 +6,28 @@ function love.load()
 	turn = 0
 	all = love.graphics.newImage("chess pieces.png")
 	wpawn = love.graphics.newQuad(1000, 0, 200, 200, all:getDimensions())
-	Piece = {x, y}
+	Piece = {x = 0, y = 0}
+
+function Piece:create (o)
+  o.parent = self
+  return o
+end
+
+function Point:move (p)
+  self.x = self.x + p.x
+  self.y = self.y + p.y
+end
+
+--
+-- creating points
+--
+p1 = Point:create{x = 10, y = 20}
+p2 = Point:create{x = 10}  -- y will be inherited until it is set
+
+--
+-- example of a method invocation
+--
+p1:move(p2)
 end
 
 function love.update(dt)
