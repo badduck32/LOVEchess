@@ -79,7 +79,18 @@ function love.mousepressed(x, y, b, isTouch)
 	clicked(x, y)
 end
 
-function 
+function pieceAt(x, y)
+	for i, piece in ipairs(wpieces) do 
+		if piece.x == x and piece.y == y then
+			return piece
+		end
+	end
+	for i, piece in ipairs(bpieces) do 
+		if piece.x == x and piece.y == y then
+			return piece
+		end
+	end
+
 
 function clicked (fx, fy)
 	x = math.floor((fx - xOffs) / 50)
