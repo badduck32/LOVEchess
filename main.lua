@@ -66,27 +66,26 @@ function love.load()
 	bpieces = createPieces(false)
 end
 
+--debug
 function love.keypressed(key)
 	turn = turn == 0 and 1 or 0
 end
 
 function love.touchpressed(id, x, y, dx, dy, p)
-	if mobile then
-		clicked(x, y)
-	end
+	clicked(x, y)
 end
 
 function love.mousepressed(x, y, b, isTouch)
-	if not mobile then 
-		clicked(x, y)
-	end
+	clicked(x, y)
 end
+
+function 
 
 function clicked (fx, fy)
 	x = math.floor((fx - xOffs) / 50)
 	y = math.floor((fy - yOffs) / 50)
 	highlights[1] = Highlight:create{x = x, y = y}
- end
+end
 
 function love.draw()
 	--draws board
