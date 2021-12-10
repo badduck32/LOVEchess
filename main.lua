@@ -113,13 +113,30 @@ function createHighlights(piece)
 		else 
 			highlights[2] = Highlight:create{x = piece.x, y = piece.y + 1}
 		end
+	--rook
+	elseif piece.type == 5 then
+		for li = 1, 4 do
+			x = (li % 2) * (li <= 2 and 1 or -1)
+			y = ((li + 1) % 2) * (li <= 2 and 1 or -1)
+			for i = 1, 7 do
+				--broken
+				highlights[1 + i + ((li - 1) * 8)] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
+			end
+		end
 	--knight
-	else if piece.type == 4 then
-		for i = 1, 4 do
-			highlights[i + 1] = Highlight:create{x = piece.x + ((i % 2) * 2) - 1, y = piece.y + 2
+	elseif piece.type == 4 then
+		for i = 1, 8 do
+			if i <= 2 then
+				highlights[i + 1] = Highlight:create{x = piece.x + ((i % 2) * 2) - 1, y = piece.y + 2}
+			elseif i <= 4 then
+				highlights[i + 1] = Highlight:create{x = piece.x + ((i % 2) * 2) - 1, y = piece.y - 2}
+			elseif i <= 6 then
+				highlights[i + 1] = Highlight:create{x = piece.x + 2, y = piece.y + ((i % 2) * 2) - 1}
+			else
+				highlights[i + 1] = Highlight:create{x = piece.x - 2, y = piece.y + ((i % 2) * 2) - 1}
+			end
 		end
 	end
-
 end
 
 function love.draw()
