@@ -113,6 +113,11 @@ function createHighlights(piece)
 		else 
 			highlights[2] = Highlight:create{x = piece.x, y = piece.y + 1}
 		end
+	--knight
+	else if piece.type == 4 then
+		for i = 1, 4 do
+			highlights[i + 1] = Highlight:create{x = piece.x + ((i % 2) * 2) - 1, y = piece.y + 2
+		end
 	end
 
 end
