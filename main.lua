@@ -119,8 +119,7 @@ function createHighlights(piece)
 			x = (li % 2) * (li <= 2 and 1 or -1)
 			y = ((li + 1) % 2) * (li <= 2 and 1 or -1)
 			for i = 1, 7 do
-				--broken
-				highlights[1 + i + ((li - 1) * 8)] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
+				highlights[1 + i + ((li - 1) * 7)] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
 			end
 		end
 	--knight
@@ -134,6 +133,17 @@ function createHighlights(piece)
 				highlights[i + 1] = Highlight:create{x = piece.x + 2, y = piece.y + ((i % 2) * 2) - 1}
 			else
 				highlights[i + 1] = Highlight:create{x = piece.x - 2, y = piece.y + ((i % 2) * 2) - 1}
+			end
+		end
+	--bishop
+	elseif piece.type == 3 then 
+		for li = 1, 4 do
+			--1 -1 1 -1
+			x = (li % 2) * 2 - 1
+			--0 1 0 -1
+			y = (li <= 2 and 1 or -1)
+			for i = 1, 7 do
+				highlights[1 + i + ((li - 1) * 7)] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
 			end
 		end
 	end
