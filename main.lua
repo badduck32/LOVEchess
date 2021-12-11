@@ -1,8 +1,8 @@
 function love.load()
-	love.window.setMode(411, 800, {resizable = false} )
+	love.window.setMode(400, 400, {resizable = true} )
 	mobile = false
-	xOffs = 5
-	yOffs = 250
+	xOffs = 0
+	yOffs = 0
 	--if white has to play turn is 0, if black1
 	turn = 0
 	sprites = love.graphics.newImage("chess pieces.png")
@@ -125,26 +125,46 @@ function createHighlights(piece)
 	--knight
 	elseif piece.type == 4 then
 		for i = 1, 8 do
-			if i <= 2 then
-				highlights[i + 1] = Highlight:create{x = piece.x + ((i % 2) * 2) - 1, y = piece.y + 2}
-			elseif i <= 4 then
-				highlights[i + 1] = Highlight:create{x = piece.x + ((i % 2) * 2) - 1, y = piece.y - 2}
-			elseif i <= 6 then
-				highlights[i + 1] = Highlight:create{x = piece.x + 2, y = piece.y + ((i % 2) * 2) - 1}
+			if i <= 4 then
+				highlights[i + 1] = Highlight:create{x = piece.x + ((i % 2) * 2) - 1, y = piece.y + (i <= 2 and 2 or -2)}
 			else
-				highlights[i + 1] = Highlight:create{x = piece.x - 2, y = piece.y + ((i % 2) * 2) - 1}
+				highlights[i + 1] = Highlight:create{x = piece.x + (i <= 6 and 2 or -2), y = piece.y + ((i % 2) * 2) - 1}
 			end
 		end
 	--bishop
 	elseif piece.type == 3 then 
 		for li = 1, 4 do
-			--1 -1 1 -1
 			x = (li % 2) * 2 - 1
-			--0 1 0 -1
 			y = (li <= 2 and 1 or -1)
 			for i = 1, 7 do
 				highlights[1 + i + ((li - 1) * 7)] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
 			end
+		end
+	--queen
+	elseif piece.type == 2 then
+		--diagonal
+		for li = 1, 4 do
+			x = (li % 2) * (li <= 2 and 1 or -1)
+			y = ((li + 1) % 2) * (li <= 2 and 1 or -1)
+			for i = 1, 7 do
+				highlights[1 + i + ((li - 1) * 7)] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
+			end
+		end
+		--hor/ver
+		for li = 1, 4 do
+			x = (li % 2) * 2 - 1
+			y = (li <= 2 and 1 or -1)
+			for i = 1, 7 do
+				highlights[21 + i + ((li - 1) * 7)] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
+			end
+		end
+	--king
+	elseif piece.type == 1 then
+		for i = 1, 4 do 
+			highlights[i + 1] = Highlight:create{x = piece.x + (i - 1) % 3 - 1, y = piece.y + math.floor((i - 1) / 3) - 1}
+		end
+		for i = 6, 9 do 
+			highlights[i] = Highlight:create{x = piece.x + (i - 1) % 3 - 1, y = piece.y + math.floor((i - 1) / 3) - 1}
 		end
 	end
 end
@@ -179,5 +199,5 @@ function love.draw()
 	drawPieces(wpieces)
 	--draw black pieces
 	drawPieces(bpieces)
-	love.graphics.print( tostring(txt) )
+	--love.graphics.print( tostring(txt) )
 end
