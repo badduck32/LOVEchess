@@ -155,7 +155,7 @@ function createHighlights(piece)
 			x = (li % 2) * 2 - 1
 			y = (li <= 2 and 1 or -1)
 			for i = 1, 7 do
-				highlights[21 + i + ((li - 1) * 7)] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
+				highlights[29 + i + ((li - 1) * 7)] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
 			end
 		end
 	--king
