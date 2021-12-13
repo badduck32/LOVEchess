@@ -1,8 +1,8 @@
 function love.load()
-	love.window.setMode(400, 400, {resizable = true} )
+	love.window.setMode(411, 450, {resizable = false} )
 	mobile = false
-	xOffs = 0
-	yOffs = 0
+	xOffs = 5
+	yOffs = 50
 	--if white has to play turn is 0, if black1
 	turn = 0
 	sprites = love.graphics.newImage("chess pieces.png")
