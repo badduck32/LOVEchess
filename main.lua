@@ -43,6 +43,7 @@ function love.load()
 			mult = -1
 		end
 		arr = {}
+		--pawns
 		for i = 1, 8 do
 			arr[i] = Piece:create{x = i - 1, y = offset + mult * 6, dead = false, type = 6, white = white}
 		end
@@ -82,12 +83,12 @@ end
 --returns the piece at specified x and y coordinate (tile coords)
 function pieceAt(x, y)
 	for i, piece in ipairs(wpieces) do 
-		if piece.x == x and piece.y == y then
+		if piece.dead == false and piece.x == x and piece.y == y then
 			return piece
 		end
 	end
 	for i, piece in ipairs(bpieces) do 
-		if piece.x == x and piece.y == y then
+		if piece.dead == false and piece.x == x and piece.y == y then
 			return piece
 		end
 	end
@@ -115,11 +116,16 @@ function createHighlights(piece)
 		end
 	--rook
 	elseif piece.type == 5 then
+		pieceIndexOffset = 0
 		for li = 1, 4 do
 			x = (li % 2) * (li <= 2 and 1 or -1)
 			y = ((li + 1) % 2) * (li <= 2 and 1 or -1)
 			for i = 1, 7 do
-				highlights[1 + i + ((li - 1) * 7)] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
+				if pieceAt(piece.x + x * i, piece.y + y * i) ~= nil then 
+					pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
+					break
+				end
+				highlights[1 + i + ((li - 1) * 7) - pieceIndexOffset] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
 			end
 		end
 	--knight
@@ -190,7 +196,9 @@ function love.draw()
 
 	function drawPieces(arr)
 		for i, piece in ipairs(arr) do
-			love.graphics.draw(sprites, types[piece.type + (piece.white and 0 or 6)], xOffs + (piece.x + turn ) * 50, yOffs + (piece.y + turn) * 50, turn * math.pi, 0.25, 0.25)
+			if piece.dead == false then
+				love.graphics.draw(sprites, types[piece.type + (piece.white and 0 or 6)], xOffs + (piece.x + turn ) * 50, yOffs + (piece.y + turn) * 50, turn * math.pi, 0.25, 0.25)
+			end
 		end
 	end
 
