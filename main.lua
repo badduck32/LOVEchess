@@ -1,8 +1,9 @@
 function love.load()
-	love.window.setMode(411, 450, {resizable = false} )
+	txt = ""
+	love.window.setMode(400, 400, {resizable = false} )
 	mobile = false
-	xOffs = 5
-	yOffs = 50
+	xOffs = 0
+	yOffs = 0
 	--if white has to play turn is 0, if black1
 	turn = 0
 	sprites = love.graphics.newImage("chess pieces.png")
@@ -18,6 +19,8 @@ function love.load()
 	Highlight = {x = 0, y = 0}
 	--highlight squares to see legal moves. only generates when clicking a piece, and reset when another piece is clicked or a move is played
 	highlights = {}
+	--highlight array to store the highlight objects in
+	selectedPiece = nil
 
 	function Piece:create (o)
   		o.parent = self
@@ -64,7 +67,9 @@ function love.load()
 		return arr
 	end
 	wpieces = createPieces(true)
+	--array of white piece objects
 	bpieces = createPieces(false)
+	--array of black piece objects
 end
 
 --debug
@@ -81,39 +86,97 @@ function love.mousepressed(x, y, b, isTouch)
 end
 
 --returns the piece at specified x and y coordinate (tile coords)
-function pieceAt(x, y)
-	for i, piece in ipairs(wpieces) do 
-		if piece.dead == false and piece.x == x and piece.y == y then
-			return piece
+function pieceAt(x, y, white)
+	if white == nil or white == true then 
+		for i, piece in ipairs(wpieces) do 
+			if piece.dead == false and piece.x == x and piece.y == y then
+				return piece
+			end
 		end
 	end
-	for i, piece in ipairs(bpieces) do 
-		if piece.dead == false and piece.x == x and piece.y == y then
-			return piece
+	if white == nil or white == false then
+		for i, piece in ipairs(bpieces) do 
+			if piece.dead == false and piece.x == x and piece.y == y then
+				return piece
+			end
 		end
 	end
 end
 
+function highlightAt(x, y)
+	for i, highlight in ipairs(highlights) do
+		if highlight.x == x and highlight.y == y then 
+			return true
+		end 
+	end 
+	return false 
+end
+
 function clicked (fx, fy)
-	highlights = {}
-	--finds which tile was clicked
 	x = math.floor((fx - xOffs) / 50)
 	y = math.floor((fy - yOffs) / 50)
-	--creates first highlight at clicked piece pos
-	highlights[1] = Highlight:create{x = x, y = y}
-	if pieceAt(x, y) ~= nil then
-		createHighlights(pieceAt(x, y))
+	--finds which tile was clicked
+	if highlightAt(x, y) and selectedPiece ~= nil then 
+		if pieceAt(x, y) ~= nil and pieceAt(x, y) ~= selectedPiece then 
+			pieceAt(x, y).dead = true 
+		end 
+		--if theres already a piece at the position you will move to, make that piece dead
+		selectedPiece.x = x
+		selectedPiece.y = y
+		highlights = {}
+		selectedPiece = nil
+	else
+		highlights = {}
+		--empties the highlight array
+		highlights[1] = Highlight:create{x = x, y = y}
+		--creates first highlight at clicked piece pos
+		if pieceAt(x, y) ~= nil then
+			selectedPiece = pieceAt(x, y)
+			createHighlights(pieceAt(x, y))
+			--if theres a piece at the clicked position, create the highlights for that piece
+		else
+			selectedPiece = nil 
+		end
 	end
 end
 
 function createHighlights(piece)
 	--pawn
 	if piece.type == 6 then 
+		pieceIndexOffset = 0
 		if piece.white then
-			highlights[2] = Highlight:create{x = piece.x, y = piece.y - 1}
-		else 
-			highlights[2] = Highlight:create{x = piece.x, y = piece.y + 1}
+			yDelta = -1
+			startRow = 6
+		else
+			yDelta = 1
+			startRow = 1
 		end
+		if pieceAt(piece.x, piece.y + yDelta) ~= nil then 
+			pieceIndexOffset = pieceIndexOffset + 1
+		else
+			highlights[2] = Highlight:create{x = piece.x, y = piece.y + yDelta}
+		end
+		if piece.y == startRow and pieceAt(piece.x, piece.y + yDelta) == nil and pieceAt(piece.x, piece.y + yDelta * 2) == nil then 
+			highlights[3 - pieceIndexOffset] = Highlight:create{x = piece.x, y = piece.y + yDelta * 2}
+		else
+			pieceIndexOffset = pieceIndexOffset + 1
+		end 
+		if pieceAt(piece.x - 1, piece.y + yDelta, not piece.white) ~= nil then 
+			highlights[4 - pieceIndexOffset] = Highlight:create{x = piece.x - 1, y = piece.y + yDelta}
+		else 
+			pieceIndexOffset = pieceIndexOffset + 1
+		end
+		if pieceAt(piece.x + 1, piece.y + yDelta, not piece.white) ~= nil then 
+			highlights[5 - pieceIndexOffset] = Highlight:create{x = piece.x + 1, y = piece.y + yDelta}
+		else 
+			pieceIndexOffset = pieceIndexOffset + 1
+		end
+		--[[else 
+			highlights[2] = Highlight:create{x = piece.x, y = piece.y + 1}
+			if piece.y == 1 then 
+				highlights[3] = Highlight:create{x = piece.x, y = piece.y + 2}
+			end 
+		end--]]
 	--rook
 	elseif piece.type == 5 then
 		pieceIndexOffset = 0
@@ -121,39 +184,70 @@ function createHighlights(piece)
 			x = (li % 2) * (li <= 2 and 1 or -1)
 			y = ((li + 1) % 2) * (li <= 2 and 1 or -1)
 			for i = 1, 7 do
-				if pieceAt(piece.x + x * i, piece.y + y * i) ~= nil then 
+				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then 
 					pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
 					break
 				end
 				highlights[1 + i + ((li - 1) * 7) - pieceIndexOffset] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
+				if pieceAt(piece.x + x * i, piece.y + y * i, not piece.white) ~= nil then 
+					pieceIndexOffset = pieceIndexOffset + (7 - i)
+					break
+				end
 			end
 		end
 	--knight
 	elseif piece.type == 4 then
+		pieceIndexOffset = 0
 		for i = 1, 8 do
 			if i <= 4 then
-				highlights[i + 1] = Highlight:create{x = piece.x + ((i % 2) * 2) - 1, y = piece.y + (i <= 2 and 2 or -2)}
+				if pieceAt(piece.x + ((i % 2) * 2) - 1, piece.y + (i <= 2 and 2 or -2), piece.white) ~= nil then
+					pieceIndexOffset = pieceIndexOffset + 1
+				else
+					highlights[i + 1 - pieceIndexOffset] = Highlight:create{x = piece.x + ((i % 2) * 2) - 1, y = piece.y + (i <= 2 and 2 or -2)}
+				end
 			else
-				highlights[i + 1] = Highlight:create{x = piece.x + (i <= 6 and 2 or -2), y = piece.y + ((i % 2) * 2) - 1}
+				if pieceAt(piece.x + (i <= 6 and 2 or -2), piece.y + ((i % 2) * 2) - 1, piece.white) ~= nil then 
+					pieceIndexOffset = pieceIndexOffset + 1
+				else 
+					highlights[i + 1 - pieceIndexOffset] = Highlight:create{x = piece.x + (i <= 6 and 2 or -2), y = piece.y + ((i % 2) * 2) - 1}
+				end
 			end
 		end
 	--bishop
 	elseif piece.type == 3 then 
+		pieceIndexOffset = 0
 		for li = 1, 4 do
 			x = (li % 2) * 2 - 1
 			y = (li <= 2 and 1 or -1)
 			for i = 1, 7 do
-				highlights[1 + i + ((li - 1) * 7)] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
+				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then 
+					pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
+					break
+				end
+				highlights[1 + i + ((li - 1) * 7) - pieceIndexOffset] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
+				if pieceAt(piece.x + x * i, piece.y + y * i, not piece.white) ~= nil then 
+					pieceIndexOffset = pieceIndexOffset + (7 - i)
+					break
+				end
 			end
 		end
 	--queen
 	elseif piece.type == 2 then
 		--diagonal
+		pieceIndexOffset = 0
 		for li = 1, 4 do
 			x = (li % 2) * (li <= 2 and 1 or -1)
 			y = ((li + 1) % 2) * (li <= 2 and 1 or -1)
 			for i = 1, 7 do
-				highlights[1 + i + ((li - 1) * 7)] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
+				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then 
+					pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
+					break
+				end
+				highlights[1 + i + ((li - 1) * 7) - pieceIndexOffset] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
+				if pieceAt(piece.x + x * i, piece.y + y * i, not piece.white) ~= nil then 
+					pieceIndexOffset = pieceIndexOffset + (7 - i)
+					break
+				end
 			end
 		end
 		--hor/ver
@@ -161,16 +255,33 @@ function createHighlights(piece)
 			x = (li % 2) * 2 - 1
 			y = (li <= 2 and 1 or -1)
 			for i = 1, 7 do
-				highlights[29 + i + ((li - 1) * 7)] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
+				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then 
+					pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
+					break
+				end
+				highlights[29 + i + ((li - 1) * 7) - pieceIndexOffset] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
+				if pieceAt(piece.x + x * i, piece.y + y * i, not piece.white) ~= nil then 
+					pieceIndexOffset = pieceIndexOffset + (7 - i)
+					break
+				end
 			end
 		end
 	--king
 	elseif piece.type == 1 then
+		pieceIndexOffset = 0
 		for i = 1, 4 do 
-			highlights[i + 1] = Highlight:create{x = piece.x + (i - 1) % 3 - 1, y = piece.y + math.floor((i - 1) / 3) - 1}
+			if pieceAt(piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, piece.white) ~= nil then 
+				pieceIndexOffset = pieceIndexOffset + 1
+			else
+				highlights[i + 1 - pieceIndexOffset] = Highlight:create{x = piece.x + (i - 1) % 3 - 1, y = piece.y + math.floor((i - 1) / 3) - 1}
+			end
 		end
 		for i = 6, 9 do 
-			highlights[i] = Highlight:create{x = piece.x + (i - 1) % 3 - 1, y = piece.y + math.floor((i - 1) / 3) - 1}
+			if pieceAt(piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, piece.white) ~= nil then 
+				pieceIndexOffset = pieceIndexOffset + 1
+			else
+				highlights[i - pieceIndexOffset] = Highlight:create{x = piece.x + (i - 1) % 3 - 1, y = piece.y + math.floor((i - 1) / 3) - 1}
+			end
 		end
 	end
 end
@@ -189,7 +300,7 @@ function love.draw()
 	end
 
 	--draws highlight squares
-	love.graphics.setColor(0.95, 0.85, 0.1)
+	love.graphics.setColor(0.95, 0.85, 0.1, 0.5)
 	for i, square in ipairs(highlights) do
 		love.graphics.rectangle("fill", xOffs + square.x * 50, yOffs + square.y * 50, 50, 50)
 	end
@@ -207,5 +318,5 @@ function love.draw()
 	drawPieces(wpieces)
 	--draw black pieces
 	drawPieces(bpieces)
-	--love.graphics.print( tostring(txt) )
+	love.graphics.print( tostring(txt) )
 end
