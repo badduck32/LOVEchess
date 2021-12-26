@@ -171,12 +171,6 @@ function createHighlights(piece)
 		else 
 			pieceIndexOffset = pieceIndexOffset + 1
 		end
-		--[[else 
-			highlights[2] = Highlight:create{x = piece.x, y = piece.y + 1}
-			if piece.y == 1 then 
-				highlights[3] = Highlight:create{x = piece.x, y = piece.y + 2}
-			end 
-		end--]]
 	--rook
 	elseif piece.type == 5 then
 		pieceIndexOffset = 0
