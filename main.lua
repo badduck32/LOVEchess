@@ -121,7 +121,7 @@ function clicked (fx, fy)
 	x = math.floor((fx - xOffs) / 50)
 	y = math.floor((fy - yOffs) / 50)
 	--finds which tile was clicked
-	if highlightAt(x, y) and selectedPiece ~= nil then 
+	if highlightAt(x, y) and selectedPiece ~= nil and pieceAt(x, y) ~= selectedPiece then 
 		if pieceAt(x, y) ~= nil and pieceAt(x, y) ~= selectedPiece then 
 			pieceAt(x, y).dead = true 
 		end 
