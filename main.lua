@@ -1,11 +1,16 @@
 function love.load()
 	txt = ""
-	love.window.setMode(400, 400, {resizable = false} )
-	mobile = false
-	xOffs = 0
-	yOffs = 0
-	--if white has to play turn is 0, if black1
-	turn = 0
+	mobile = true
+	if mobile == false then
+		love.window.setMode(400, 400, {resizable = false} )
+		xOffs = 0
+		yOffs = 0
+	else
+		love.window.setMode(411, 450, {resizable = false} )
+		xOffs = 5
+		yOffs = 50
+	end
+	whitesTurn = true
 	sprites = love.graphics.newImage("chess pieces.png")
 	types = {}
 	for i = 1, 6 do
@@ -74,7 +79,7 @@ end
 
 --debug
 function love.keypressed(key)
-	turn = turn == 0 and 1 or 0
+whitesTurn = whitesTurn == 0 and 1 or 0
 end
 
 --clicking/touching implementation
@@ -121,6 +126,7 @@ function clicked (fx, fy)
 			pieceAt(x, y).dead = true 
 		end 
 		--if theres already a piece at the position you will move to, make that piece dead
+		whitesTurn = not whitesTurn
 		selectedPiece.x = x
 		selectedPiece.y = y
 		highlights = {}
@@ -130,7 +136,7 @@ function clicked (fx, fy)
 		--empties the highlight array
 		highlights[1] = Highlight:create{x = x, y = y}
 		--creates first highlight at clicked piece pos
-		if pieceAt(x, y) ~= nil then
+		if pieceAt(x, y, whitesTurn) ~= nil then
 			selectedPiece = pieceAt(x, y)
 			createHighlights(pieceAt(x, y))
 			--if theres a piece at the clicked position, create the highlights for that piece
@@ -302,7 +308,7 @@ function love.draw()
 	function drawPieces(arr)
 		for i, piece in ipairs(arr) do
 			if piece.dead == false then
-				love.graphics.draw(sprites, types[piece.type + (piece.white and 0 or 6)], xOffs + (piece.x + turn ) * 50, yOffs + (piece.y + turn) * 50, turn * math.pi, 0.25, 0.25)
+				love.graphics.draw(sprites, types[piece.type + (piece.white and 0 or 6)], xOffs + (piece.x + (whitesTurn and 0 or 1)) * 50, yOffs + (piece.y + (whitesTurn and 0 or 1)) * 50, (whitesTurn and 0 or 1) * math.pi, 0.25, 0.25)
 			end
 		end
 	end
