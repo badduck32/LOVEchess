@@ -6,7 +6,7 @@ LÖVEchess is a chess game made entirely in [LÖVE2D](https://love2d.org/).
 
 ## How to play
 
-To play my game you first need to download LÖVE2D on your device. With that installed, open the build.love file in LÖVE2D.
+To play my game you first need to download [LÖVE2D](https://love2d.org/) on your device. With that installed, open the build.love file in LÖVE2D.
 
 ## Aim of this project
 
