@@ -8,6 +8,21 @@ LÖVEchess is a chess game made entirely in [LÖVE2D](https://love2d.org/).
 
 To play my game you first need to download [LÖVE2D](https://love2d.org/) on your device. With that installed, open the [build.love](https://github.com/badduck32/LOVEchess/blob/main/firstbuild.love) file in LÖVE2D.
 
+## Features
+
+- Turn system
+- All pieces move according to chess rules
+
+Upcoming features:
+
+- En passant
+- Pawn promotion
+- Check detection
+- Checkmate detection
+- Stalemate detection
+- Timers
+- Win screen
+
 ## Aim of this project
 
 The aim of this project is to make a feature complete and fully open source chess game to be used and adapted by everyone, completely for free.
