@@ -1,4 +1,4 @@
-![](LÖVEchess_preview)
+![](LÖVEchess_preview.png)
 
 # LÖVEchess
 
