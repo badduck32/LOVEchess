@@ -10,7 +10,7 @@ function gameLoad(mobile)
 		yOffs = 50
 	end
 	whitesTurn = true
-	sprites = love.graphics.newImage("chess pieces.png")
+	sprites = love.graphics.newImage("images/chess pieces.png")
 	types = {}
 	for i = 1, 6 do
 		types[i] = love.graphics.newQuad((i - 1) * 200, 0, 200, 200, sprites:getDimensions())
