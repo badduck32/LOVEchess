@@ -1,7 +1,7 @@
-require("game")
-require("menu")
+game = require("game")
+menu = require("menu")
 
-function love.load( ... )
+function love.load()
 	scene = 0
 	mobile = false
 	--scene 0: menu, scene 1: game, scene 2: settings
