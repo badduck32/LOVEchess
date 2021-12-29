@@ -1,8 +1,8 @@
-![](LÖVEchess_preview.png)
-
 # LÖVEchess
 
 LÖVEchess is a chess game made entirely in [LÖVE2D](https://love2d.org/).
+
+![](LÖVEchess_preview.png)
 
 ## How to play
 
