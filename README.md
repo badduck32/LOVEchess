@@ -10,6 +10,8 @@ To play my game you first need to download [LÖVE2D](https://love2d.org/) on you
 
 ## Features
 
+Already implemented features:
+
 - Turn system
 - All pieces move according to chess rules
 
