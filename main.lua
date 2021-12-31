@@ -1,5 +1,7 @@
 game = require("game")
 menu = require("menu")
+settings = require("settings")
+json = require "json"
 
 function love.load()
 	scene = 0
