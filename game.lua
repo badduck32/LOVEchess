@@ -129,6 +129,7 @@ function gameClicked (fx, fy)
 		selectedPiece.x = x
 		selectedPiece.y = y
 		highlights = {}
+		selectedPiece.firstMove = false
 		selectedPiece = nil
 	else
 		highlights = {}
@@ -159,7 +160,6 @@ function createHighlights(piece)
 			if piece.firstMove and pieceAt(piece.x, piece.y + yDelta * 2) == nil then 
 				highlights[2] = Highlight:create{x = piece.x, y = piece.y + yDelta}
 				highlights[3 - pieceIndexOffset] = Highlight:create{x = piece.x, y = piece.y + yDelta * 2}
-				piece.firstMove = false
 				--should also store that it moved 2 squares for en passant
 			--if not, move one square
 			else
