@@ -5,7 +5,7 @@ json = require "json"
 
 function love.load()
 	scene = 0
-	mobile = true
+	mobile = false
 	--scene 0: menu, scene 1: game, scene 2: settings
 	menuLoad(mobile)
 end
