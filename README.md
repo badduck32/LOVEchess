@@ -14,10 +14,10 @@ Already implemented features:
 
 - Turn system
 - All pieces move according to chess rules
+- - En passant
 
 Upcoming features:
 
-- En passant
 - Castling
 - Pawn promotion
 - Check detection
@@ -27,7 +27,7 @@ Upcoming features:
 - Timers
 - Win screen
 
-Potential features:
+Potentially upcoming features:
 
 - Customizable board
 - Customizable rules
