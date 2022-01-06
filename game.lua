@@ -124,13 +124,16 @@ function gameClicked (fx, fy)
 	x = math.floor((fx - xOffs) / 50)
 	y = math.floor((fy - yOffs) / 50)
 	if highlightAt(x, y) and selectedPiece ~= nil and pieceAt(x, y) ~= selectedPiece then 
-		--if theres already a piece at the position you will move to, make that piece dead
+		--if theres already a piece at the position you will move to (or if en passant), make that piece dead
 		if pieceAt(x, y) ~= nil and pieceAt(x, y) ~= selectedPiece then 
 			pieceAt(x, y).dead = true 
 		end 
+		if pawnMoved2Squares ~= nil and selectedPiece.type == 6 and pieceAt(x, y + (selectedPiece.white and 1 or -1), not selectedPiece.white) == pawnMoved2Squares then 
+			pieceAt(x, y + (selectedPiece.white and 1 or -1)).dead = true 
+		end
 		whitesTurn = not whitesTurn
 		--check if a pawn moved 2 squares (for en passant)
-		if selectedPiece.type == 6 and y - selectedPiece.y == 2 then
+		if selectedPiece.type == 6 and math.abs(y - selectedPiece.y) == 2 then
 			pawnMoved2Squares = selectedPiece
 		else 
 			pawnMoved2Squares = nil
