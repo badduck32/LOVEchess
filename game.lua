@@ -18,7 +18,7 @@ function gameLoad(mobile)
 	for i = 7, 12 do
 		types[i] = love.graphics.newQuad((i - 7) * 200, 200, 200, 200, sprites:getDimensions())
 	end
-	Piece = {x = 0, y = 0, dead = false, type = 6, white = true}
+	Piece = {x = 0, y = 0, dead = false, type = 6, white = true, firstMove = true}
 	--types: 1 = king, 2 = queen, 3 = bishop, 4 = knight, 5 = rook, 6 = pawn
 	Highlight = {x = 0, y = 0}
 	--highlight squares to see legal moves. only generates when clicking a piece, and reset when another piece is clicked or a move is played
@@ -31,10 +31,10 @@ function gameLoad(mobile)
   		return o
 	end
 
-	function Piece:move (p)
+	--[[function Piece:move (p)
   		self.x = self.x + p.x
   		self.y = self.y + p.y
-	end
+	end--]]
 
 	function Highlight:create (o)
 		o.parent = self 
@@ -52,7 +52,7 @@ function gameLoad(mobile)
 		arr = {}
 		--pawns
 		for i = 1, 8 do
-			arr[i] = Piece:create{x = i - 1, y = offset + mult * 6, dead = false, type = 6, white = white}
+			arr[i] = Piece:create{x = i - 1, y = offset + mult * 6, dead = false, type = 6, white = white, firstMove = true}
 		end
 		--rooks
 		arr[9] = Piece:create{x = 0, y = offset + mult * 7, dead = false, type = 5, white = white}
@@ -146,31 +146,40 @@ function gameClicked (fx, fy)
 end
 
 function createHighlights(piece)
+	--[[code refactor:
+	if piece in front then
+		pieceindexoffset++
+	else
+	
+	--]]
 	--pawn
 	if piece.type == 6 then 
 		pieceIndexOffset = 0
 		if piece.white then
 			yDelta = -1
-			startRow = 6
 		else
 			yDelta = 1
-			startRow = 1
 		end
+		--check if there's a piece directly in front
 		if pieceAt(piece.x, piece.y + yDelta) ~= nil then 
 			pieceIndexOffset = pieceIndexOffset + 1
 		else
 			highlights[2] = Highlight:create{x = piece.x, y = piece.y + yDelta}
 		end
-		if piece.y == startRow and pieceAt(piece.x, piece.y + yDelta) == nil and pieceAt(piece.x, piece.y + yDelta * 2) == nil then 
+		--checks if its allowed to move 2 squares
+		if piece.firstMove and pieceAt(piece.x, piece.y + yDelta) == nil and pieceAt(piece.x, piece.y + yDelta * 2) == nil then 
 			highlights[3 - pieceIndexOffset] = Highlight:create{x = piece.x, y = piece.y + yDelta * 2}
+			piece.firstMove = false
 		else
 			pieceIndexOffset = pieceIndexOffset + 1
-		end 
+		end
+		--checks if it can take left
 		if pieceAt(piece.x - 1, piece.y + yDelta, not piece.white) ~= nil then 
 			highlights[4 - pieceIndexOffset] = Highlight:create{x = piece.x - 1, y = piece.y + yDelta}
 		else 
 			pieceIndexOffset = pieceIndexOffset + 1
 		end
+		--checks if it can take right
 		if pieceAt(piece.x + 1, piece.y + yDelta, not piece.white) ~= nil then 
 			highlights[5 - pieceIndexOffset] = Highlight:create{x = piece.x + 1, y = piece.y + yDelta}
 		else 
