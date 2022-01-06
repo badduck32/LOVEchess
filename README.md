@@ -18,12 +18,20 @@ Already implemented features:
 Upcoming features:
 
 - En passant
+- Castling
 - Pawn promotion
 - Check detection
 - Checkmate detection
 - Stalemate detection
+- Pinned piece detection
 - Timers
 - Win screen
+
+Potential features:
+
+- Customizable board
+- Customizable rules
+- Online multiplayer
 
 ## Aim of this project
 
