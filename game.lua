@@ -146,32 +146,26 @@ function gameClicked (fx, fy)
 end
 
 function createHighlights(piece)
-	--[[code refactor:
-	if piece in front then
-		pieceindexoffset++
-	else
-	
-	--]]
 	--pawn
 	if piece.type == 6 then 
 		pieceIndexOffset = 0
-		if piece.white then
-			yDelta = -1
-		else
-			yDelta = 1
-		end
+		--if piece is white, ydelta = -1, else = 1
+		yDelta = piece.white and -1 or 1
 		--check if there's a piece directly in front
 		if pieceAt(piece.x, piece.y + yDelta) ~= nil then 
-			pieceIndexOffset = pieceIndexOffset + 1
+			pieceIndexOffset = pieceIndexOffset + 2
 		else
-			highlights[2] = Highlight:create{x = piece.x, y = piece.y + yDelta}
-		end
-		--checks if its allowed to move 2 squares
-		if piece.firstMove and pieceAt(piece.x, piece.y + yDelta) == nil and pieceAt(piece.x, piece.y + yDelta * 2) == nil then 
-			highlights[3 - pieceIndexOffset] = Highlight:create{x = piece.x, y = piece.y + yDelta * 2}
-			piece.firstMove = false
-		else
-			pieceIndexOffset = pieceIndexOffset + 1
+			--check if pawn is allowed to move 2 squares
+			if piece.firstMove and pieceAt(piece.x, piece.y + yDelta * 2) == nil then 
+				highlights[2] = Highlight:create{x = piece.x, y = piece.y + yDelta}
+				highlights[3 - pieceIndexOffset] = Highlight:create{x = piece.x, y = piece.y + yDelta * 2}
+				piece.firstMove = false
+				--should also store that it moved 2 squares for en passant
+			--if not, move one square
+			else
+				highlights[2] = Highlight:create{x = piece.x, y = piece.y + yDelta}
+				pieceIndexOffset = pieceIndexOffset + 1
+			end
 		end
 		--checks if it can take left
 		if pieceAt(piece.x - 1, piece.y + yDelta, not piece.white) ~= nil then 
@@ -185,6 +179,7 @@ function createHighlights(piece)
 		else 
 			pieceIndexOffset = pieceIndexOffset + 1
 		end
+		--2 = in front, 3 = 2 in front, 4 = left, 5 = right
 	--rook
 	elseif piece.type == 5 then
 		pieceIndexOffset = 0
