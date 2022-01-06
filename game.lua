@@ -18,6 +18,7 @@ function gameLoad(mobile)
 	for i = 7, 12 do
 		types[i] = love.graphics.newQuad((i - 7) * 200, 200, 200, 200, sprites:getDimensions())
 	end
+	--last 2 object variables are for the pawn only
 	Piece = {x = 0, y = 0, dead = false, type = 6, white = true, firstMove = true}
 	--types: 1 = king, 2 = queen, 3 = bishop, 4 = knight, 5 = rook, 6 = pawn
 	Highlight = {x = 0, y = 0}
@@ -25,6 +26,8 @@ function gameLoad(mobile)
 	highlights = {}
 	--highlight array to store the highlight objects in
 	selectedPiece = nil
+	--stores a pawn that moved 2 squares last turn (for en passant)
+	pawnMoved2Squares = nil
 
 	function Piece:create (o)
   		o.parent = self
@@ -117,29 +120,36 @@ function highlightAt(x, y)
 end
 
 function gameClicked (fx, fy)
+	--finds which tile was clicked
 	x = math.floor((fx - xOffs) / 50)
 	y = math.floor((fy - yOffs) / 50)
-	--finds which tile was clicked
 	if highlightAt(x, y) and selectedPiece ~= nil and pieceAt(x, y) ~= selectedPiece then 
+		--if theres already a piece at the position you will move to, make that piece dead
 		if pieceAt(x, y) ~= nil and pieceAt(x, y) ~= selectedPiece then 
 			pieceAt(x, y).dead = true 
 		end 
-		--if theres already a piece at the position you will move to, make that piece dead
 		whitesTurn = not whitesTurn
+		--check if a pawn moved 2 squares (for en passant)
+		if selectedPiece.type == 6 and y - selectedPiece.y == 2 then
+			pawnMoved2Squares = selectedPiece
+		else 
+			pawnMoved2Squares = nil
+		end
 		selectedPiece.x = x
 		selectedPiece.y = y
 		highlights = {}
 		selectedPiece.firstMove = false
 		selectedPiece = nil
+		
 	else
-		highlights = {}
 		--empties the highlight array
-		highlights[1] = Highlight:create{x = x, y = y}
+		highlights = {}
 		--creates first highlight at clicked piece pos
+		highlights[1] = Highlight:create{x = x, y = y}
+		--if theres a piece at the clicked position, create the highlights for that piece
 		if pieceAt(x, y, whitesTurn) ~= nil then
 			selectedPiece = pieceAt(x, y)
 			createHighlights(pieceAt(x, y))
-			--if theres a piece at the clicked position, create the highlights for that piece
 		else
 			selectedPiece = nil 
 		end
@@ -179,7 +189,18 @@ function createHighlights(piece)
 		else 
 			pieceIndexOffset = pieceIndexOffset + 1
 		end
-		--2 = in front, 3 = 2 in front, 4 = left, 5 = right
+		--checks for en passant left
+		if pawnMoved2Squares ~= nil and pieceAt(piece.x - 1, piece.y, not piece.white) == pawnMoved2Squares then 
+			highlights[6 - pieceIndexOffset] = Highlight:create{x = piece.x - 1, y = piece.y + yDelta}
+		else
+			pieceIndexOffset = pieceIndexOffset + 1
+		end
+		--checks for en passant right
+		if pawnMoved2Squares ~= nil and pieceAt(piece.x + 1, piece.y, not piece.white) == pawnMoved2Squares then 
+			highlights[7 - pieceIndexOffset] = Highlight:create{x = piece.x + 1, y = piece.y + yDelta}
+		else 
+			pieceIndexOffset = pieceIndexOffset + 1
+		end
 	--rook
 	elseif piece.type == 5 then
 		pieceIndexOffset = 0
