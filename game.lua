@@ -1,5 +1,6 @@
 function gameLoad(mobile)
 	txt = ""
+	mobile = mobile
 	if mobile == false then
 		love.window.setMode(400, 400, {resizable = false} )
 		xOffs = 0
@@ -80,9 +81,9 @@ function gameLoad(mobile)
 end
 
 --debug
---[[function love.keypressed(key)
-whitesTurn = whitesTurn == 0 and 1 or 0
-end--]]
+function love.keypressed(key)
+	beingAttackedAt(0, 0)
+end
 
 --clicking/touching implementation
 --[[function love.touchpressed(id, x, y, dx, dy, p)
@@ -159,7 +160,8 @@ function gameClicked (fx, fy)
 	end
 end
 
-function createHighlights(piece)
+--if checkingAttack is true, it checks if a certain square is being attacked instead of creating highlights
+function createHighlights(piece, checkingAttack)
 	--pawn
 	if piece.type == 6 then 
 		pieceIndexOffset = 0
@@ -313,6 +315,24 @@ function createHighlights(piece)
 	end
 end
 
+--checks if any given square is actively being attacked by any piece on the board
+function beingAttackedAt(x, y, white)
+	if white == nil or white == true then 
+		for i, piece in ipairs(wpieces) do 
+			if piece.dead == false then
+				createHighlights(piece)
+			end
+		end
+	end
+	if white == nil or white == false then
+		for i, piece in ipairs(bpieces) do 
+			if piece.dead == false and piece.x == x and piece.y == y then
+				createHighlights(piece)
+			end
+		end
+	end
+end
+
 function gameDraw()
 	--draws board
 	love.graphics.setColor(0.95, 0.75, 0.6)
@@ -335,7 +355,7 @@ function gameDraw()
 	function drawPieces(arr)
 		for i, piece in ipairs(arr) do
 			if piece.dead == false then
-				love.graphics.draw(sprites, types[piece.type + (piece.white and 0 or 6)], xOffs + (piece.x + (whitesTurn and 0 or 1)) * 50, yOffs + (piece.y + (whitesTurn and 0 or 1)) * 50, (whitesTurn and 0 or 1) * math.pi, 0.25, 0.25)
+				love.graphics.draw(sprites, types[piece.type + (piece.white and 0 or 6)], xOffs + (piece.x + (whitesTurn and 0 or 1) * (mobile and 1 or 0)) * 50, yOffs + (piece.y + (whitesTurn and 0 or 1) * (mobile and 1 or 0)) * 50, (mobile and 1 or 0) * (whitesTurn and 0 or 1) * math.pi, 0.25, 0.25)
 			end
 		end
 	end
