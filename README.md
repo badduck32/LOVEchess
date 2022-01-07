@@ -14,16 +14,24 @@ Already implemented features:
 
 - Turn system
 - All pieces move according to chess rules
+- - En passant
 
 Upcoming features:
 
-- En passant
+- Castling
 - Pawn promotion
 - Check detection
 - Checkmate detection
 - Stalemate detection
+- Pinned piece detection
 - Timers
 - Win screen
+
+Potentially upcoming features:
+
+- Customizable board
+- Customizable rules
+- Online multiplayer
 
 ## Aim of this project
 
