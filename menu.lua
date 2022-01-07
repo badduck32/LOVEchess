@@ -1,4 +1,6 @@
-function menuLoad(mobile)
+local menu = {}
+
+menu.load = function (mobile)
     --load stuff
 	if mobile == false then
 		love.window.setMode(400, 400, {resizable = false} )
@@ -11,7 +13,7 @@ function menuLoad(mobile)
 	end
 end
 
-function menuClicked(x, y)
+menu.clicked = function (x, y)
     if y >= yOffs and y < yOffs + 50 then 
         loadScene(1)
     elseif y >= yOffs + 100 and y < yOffs + 150 then 
@@ -19,8 +21,10 @@ function menuClicked(x, y)
     end
 end
 
-function menuDraw ()
+menu.draw = function ()
     love.graphics.print("play", xOffs, yOffs, 0, 2)
     love.graphics.print("settings", xOffs, yOffs + 50, 0, 2)
     love.graphics.print("quit", xOffs, yOffs + 100, 0, 2)
 end
+
+return menu
