@@ -145,6 +145,8 @@ function gameClicked (fx, fy)
 		selectedPiece.y = y
 		highlights = {}
 		selectedPiece.firstMove = false
+		--check if the other player's king is checked
+		isChecked(whitesTurn)
 		selectedPiece = nil
 		
 	else
@@ -165,7 +167,9 @@ end
 --if checkingAttack is true, it checks if a certain square is being attacked instead of creating highlights
 --ax and ay are attack x and attack y
 function createHighlights(piece, checkingAttack, ax, ay)
-	pieceIndexOffset = 0
+	if not checkingAttack then
+		pieceIndexOffset = 0
+	end
 	--pawn
 	if piece.type == 6 then 
 		--if piece is white, ydelta = -1, else = 1
@@ -188,25 +192,25 @@ function createHighlights(piece, checkingAttack, ax, ay)
 		--checks if it can take left
 		if pieceAt(piece.x - 1, piece.y + yDelta, not piece.white) ~= nil or checkingAttack then 
 			createHighlightAt(4 - pieceIndexOffset, piece.x - 1,piece.y + yDelta, checkingAttack, ax, ay)
-		else 
+		elseif not checkingAttack then
 			pieceIndexOffset = pieceIndexOffset + 1
 		end
 		--checks if it can take right
 		if pieceAt(piece.x + 1, piece.y + yDelta, not piece.white) ~= nil or checkingAttack then 
 			createHighlightAt(5 - pieceIndexOffset, piece.x + 1, piece.y + yDelta, checkingAttack, ax, ay)
-		else 
+		elseif not checkingAttack then
 			pieceIndexOffset = pieceIndexOffset + 1
 		end
 		--checks for en passant left
 		if pawnMoved2Squares ~= nil and pieceAt(piece.x - 1, piece.y, not piece.white) == pawnMoved2Squares then 
 			createHighlightAt(6 - pieceIndexOffset, piece.x - 1, piece.y + yDelta, checkingAttack, ax, ay)
-		else
+		elseif not checkingAttack then
 			pieceIndexOffset = pieceIndexOffset + 1
 		end
 		--checks for en passant right
 		if pawnMoved2Squares ~= nil and pieceAt(piece.x + 1, piece.y, not piece.white) == pawnMoved2Squares then 
 			createHighlightAt(7 - pieceIndexOffset, piece.x + 1, piece.y + yDelta, checkingAttack, ax, ay)
-		else 
+		elseif not checkingAttack then
 			pieceIndexOffset = pieceIndexOffset + 1
 		end
 	--rook
@@ -215,13 +219,17 @@ function createHighlights(piece, checkingAttack, ax, ay)
 			x = (li % 2) * (li <= 2 and 1 or -1)
 			y = ((li + 1) % 2) * (li <= 2 and 1 or -1)
 			for i = 1, 7 do
-				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
+				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then
+					if not checkingAttack then
+						pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
+					end
 					break
 				end
 				createHighlightAt(1 + i + ((li - 1) * 7) - pieceIndexOffset, piece.x + x * i, piece.y + y * i, checkingAttack, ax, ay)
 				if pieceAt(piece.x + x * i, piece.y + y * i, not piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i)
+					if not checkingAttack then
+						pieceIndexOffset = pieceIndexOffset + (7 - i)
+					end
 					break
 				end
 			end
@@ -230,13 +238,13 @@ function createHighlights(piece, checkingAttack, ax, ay)
 	elseif piece.type == 4 then
 		for i = 1, 8 do
 			if i <= 4 then
-				if pieceAt(piece.x + ((i % 2) * 2) - 1, piece.y + (i <= 2 and 2 or -2), piece.white) ~= nil then
+				if pieceAt(piece.x + ((i % 2) * 2) - 1, piece.y + (i <= 2 and 2 or -2), piece.white) ~= nil and not checkingAttack then
 					pieceIndexOffset = pieceIndexOffset + 1
 				else
 					createHighlightAt(i + 1 - pieceIndexOffset, piece.x + ((i % 2) * 2) - 1, piece.y + (i <= 2 and 2 or -2), checkingAttack, ax, ay)
 				end
 			else
-				if pieceAt(piece.x + (i <= 6 and 2 or -2), piece.y + ((i % 2) * 2) - 1, piece.white) ~= nil then 
+				if pieceAt(piece.x + (i <= 6 and 2 or -2), piece.y + ((i % 2) * 2) - 1, piece.white) ~= nil and not checkingAttack then 
 					pieceIndexOffset = pieceIndexOffset + 1
 				else 
 					createHighlightAt(i + 1 - pieceIndexOffset, piece.x + (i <= 6 and 2 or -2), piece.y + ((i % 2) * 2) - 1, checkingAttack, ax, ay)
@@ -249,13 +257,17 @@ function createHighlights(piece, checkingAttack, ax, ay)
 			x = (li % 2) * 2 - 1
 			y = (li <= 2 and 1 or -1)
 			for i = 1, 7 do
-				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
+				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then
+					if not checkingAttack then
+						pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
+					end
 					break
 				end
 				createHighlightAt(1 + i + ((li - 1) * 7) - pieceIndexOffset, piece.x + x * i, piece.y + y * i, checkingAttack, ax, ay)
 				if pieceAt(piece.x + x * i, piece.y + y * i, not piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i)
+					if not checkingAttack then
+						pieceIndexOffset = pieceIndexOffset + (7 - i)
+					end
 					break
 				end
 			end
@@ -267,13 +279,17 @@ function createHighlights(piece, checkingAttack, ax, ay)
 			x = (li % 2) * (li <= 2 and 1 or -1)
 			y = ((li + 1) % 2) * (li <= 2 and 1 or -1)
 			for i = 1, 7 do
-				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
+				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then
+					if not checkingAttack then
+						pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
+					end
 					break
 				end
 				createHighlightAt(1 + i + ((li - 1) * 7) - pieceIndexOffset, piece.x + x * i, piece.y + y * i, checkingAttack, ax, ay)
-				if pieceAt(piece.x + x * i, piece.y + y * i, not piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i)
+				if pieceAt(piece.x + x * i, piece.y + y * i, not piece.white) ~= nil then
+					if not checkingAttack then
+						pieceIndexOffset = pieceIndexOffset + (7 - i)
+					end
 					break
 				end
 			end
@@ -283,13 +299,17 @@ function createHighlights(piece, checkingAttack, ax, ay)
 			x = (li % 2) * 2 - 1
 			y = (li <= 2 and 1 or -1)
 			for i = 1, 7 do
-				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
+				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then
+					if not checkingAttack then
+						pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
+					end
 					break
 				end
 				createHighlightAt(29 + i + ((li - 1) * 7) - pieceIndexOffset, piece.x + x * i, piece.y + y * i, checkingAttack, ax, ay)
-				if pieceAt(piece.x + x * i, piece.y + y * i, not piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i)
+				if pieceAt(piece.x + x * i, piece.y + y * i, not piece.white) ~= nil then
+					if not checkingAttack then
+						pieceIndexOffset = pieceIndexOffset + (7 - i)
+					end
 					break
 				end
 			end
@@ -298,19 +318,15 @@ function createHighlights(piece, checkingAttack, ax, ay)
 	elseif piece.type == 1 and not checkingAttack then
 		for i = 1, 4 do 
 			if (pieceAt(piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, piece.white) ~= nil or beingAttackedAt(piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, not piece.white)) then 
-				
 				pieceIndexOffset = pieceIndexOffset + 1
 			else
-				print("made highlight (" .. pieceIndexOffset .. ")")
 				createHighlightAt(i + 1 - pieceIndexOffset, piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, checkingAttack, ax, ay)
 			end
 		end
 		for i = 6, 9 do 
 			if (pieceAt(piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, piece.white) ~= nil or beingAttackedAt(piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, not piece.white)) then 
-				
 				pieceIndexOffset = pieceIndexOffset + 1
 			else
-				print("made highlight (" .. pieceIndexOffset .. ")")
 				createHighlightAt(i - pieceIndexOffset, piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, checkingAttack, ax, ay)
 			end
 		end
@@ -349,6 +365,18 @@ function beingAttackedAt(x, y, white)
 		end
 	end
 	return false
+end
+
+function isChecked()
+	if whitesTurn then
+		if beingAttackedAt(wpieces[16].x, wpieces[16].y, not whitesTurn) then
+			print("white is checked")
+		end
+	else
+		if beingAttackedAt(bpieces[16].x, bpieces[16].y, not whitesTurn) then
+			print("black is checked")
+		end
+	end
 end
 
 function gameDraw()
