@@ -14,13 +14,13 @@ Already implemented features:
 
 - Turn system
 - All pieces move according to chess rules
-- - En passant
+- En passant
 
 Upcoming features:
 
 - Castling
 - Pawn promotion
-- Check detection
+- Check detection (almost working)
 - Checkmate detection
 - Stalemate detection
 - Pinned piece detection
