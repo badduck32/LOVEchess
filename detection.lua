@@ -182,6 +182,7 @@ detection.createHighlights = function (piece, checkingAttack, ax, ay)
 			if (detection.pieceAt(piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, piece.white) ~= nil or detection.beingAttackedAt(piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, not piece.white)) then 
 				pieceIndexOffset = pieceIndexOffset + 1
 			else
+				print("created highlight")
 				detection.createHighlightAt(i + 1 - pieceIndexOffset, piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, checkingAttack, ax, ay)
 			end
 		end
@@ -189,6 +190,7 @@ detection.createHighlights = function (piece, checkingAttack, ax, ay)
 			if (detection.pieceAt(piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, piece.white) ~= nil or detection.beingAttackedAt(piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, not piece.white)) then 
 				pieceIndexOffset = pieceIndexOffset + 1
 			else
+				print("created highlight")
 				detection.createHighlightAt(i - pieceIndexOffset, piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, checkingAttack, ax, ay)
 			end
 		end
