@@ -20,10 +20,10 @@ Upcoming features:
 
 - Castling
 - Pawn promotion
-- Check detection (almost working)
+- Check detection (detection is there, but you can still move other pieces when king is checked)
 - Checkmate detection
 - Stalemate detection
-- Pinned piece detection
+- Pinned piece detection (detection is there, but you can still move the piece)
 - Timers
 - Win screen
 
