@@ -16,6 +16,9 @@ end
 menu.clicked = function (x, y)
     if y >= yOffs and y < yOffs + 50 then 
         loadScene(1)
+    elseif y >= yOffs + 50 and y < yOffs + 100 then
+        print("settings loaded")
+        loadScene(2)
     elseif y >= yOffs + 100 and y < yOffs + 150 then 
         love.event.quit()
     end
