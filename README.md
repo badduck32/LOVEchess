@@ -1,6 +1,6 @@
 # LÖVEchess
 
-LÖVEchess is a chess game made entirely in [LÖVE2D](https://love2d.org/).
+LÖVEchess is a chess game made entirely in [LÖVE2D](https://love2d.org/) (the game is currently not finished yet).
 
 ![](images/LÖVEchess_preview.png)
 
@@ -20,10 +20,10 @@ Upcoming features:
 
 - Castling
 - Pawn promotion
-- Check detection (almost working)
+- Check detection (detection is there, but you can still move other pieces when king is checked)
 - Checkmate detection
 - Stalemate detection
-- Pinned piece detection
+- Pinned piece detection (detection is there, but you can still move the piece)
 - Timers
 - Win screen
 
