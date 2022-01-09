@@ -1,7 +1,7 @@
 local detection = {}
 
 detection.pieceAt = function (x, y, white)
-	if white == nil or white == true then 
+	if white == nil or white == true then
 		for i, piece in ipairs(wpieces) do 
 			if piece.dead == false and piece.x == x and piece.y == y then
 				return piece
@@ -30,6 +30,10 @@ end
 --ax and ay are attack x and attack y
 detection.createHighlights = function (piece, checkingAttack, ax, ay)
 	if not checkingAttack then
+		pieceIndexOffset = 0
+		print(piece)
+	elseif pieceIndexOffset == nil then
+		--to avoid errors when checking for pinned pieces
 		pieceIndexOffset = 0
 	end
 	--pawn
@@ -235,12 +239,25 @@ detection.isChecked = function ()
 	if whitesTurn then
 		if detection.beingAttackedAt(wpieces[16].x, wpieces[16].y, not whitesTurn) then
 			print("white is checked")
+			return true
 		end
 	else
 		if detection.beingAttackedAt(bpieces[16].x, bpieces[16].y, not whitesTurn) then
 			print("black is checked")
+			return true
 		end
 	end
+	return false
+end
+
+detection.piecePinned = function(piece)
+	piece.dead = true
+	if detection.isChecked() then
+		print("this piece is pinned!")
+	end
+	piece.dead = false
+	print("back to life")
+	--return outp
 end
 
 return detection

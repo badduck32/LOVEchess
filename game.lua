@@ -136,7 +136,8 @@ game.clicked = function (fx, fy)
 		--if theres a piece at the clicked position, create the highlights for that piece
 		if detection.pieceAt(x, y, whitesTurn) ~= nil then
 			selectedPiece = detection.pieceAt(x, y)
-			detection.createHighlights(detection.pieceAt(x, y), false)
+			detection.piecePinned(selectedPiece)
+			detection.createHighlights(selectedPiece, false)
 		else
 			selectedPiece = nil 
 		end
