@@ -1,5 +1,10 @@
-function gameLoad(mobile)
+detection = require("detection")
+
+local game = {}
+
+game.load = function (mobile)
 	txt = ""
+	mobile = mobile
 	if mobile == false then
 		love.window.setMode(400, 400, {resizable = false} )
 		xOffs = 0
@@ -18,23 +23,28 @@ function gameLoad(mobile)
 	for i = 7, 12 do
 		types[i] = love.graphics.newQuad((i - 7) * 200, 200, 200, 200, sprites:getDimensions())
 	end
-	Piece = {x = 0, y = 0, dead = false, type = 6, white = true}
+	--last 2 object variables are for the pawn only
+	Piece = {x = 0, y = 0, dead = false, type = 6, white = true, firstMove = true}
 	--types: 1 = king, 2 = queen, 3 = bishop, 4 = knight, 5 = rook, 6 = pawn
 	Highlight = {x = 0, y = 0}
 	--highlight squares to see legal moves. only generates when clicking a piece, and reset when another piece is clicked or a move is played
 	highlights = {}
 	--highlight array to store the highlight objects in
 	selectedPiece = nil
+	--stores a pawn that moved 2 squares last turn (for en passant)
+	pawnMoved2Squares = nil
+	--boolean to break a loop (this is the easiest and best way I found of doing it)
+	attacksSquare = false
 
 	function Piece:create (o)
   		o.parent = self
   		return o
 	end
 
-	function Piece:move (p)
+	--[[function Piece:move (p)
   		self.x = self.x + p.x
   		self.y = self.y + p.y
-	end
+	end--]]
 
 	function Highlight:create (o)
 		o.parent = self 
@@ -52,7 +62,7 @@ function gameLoad(mobile)
 		arr = {}
 		--pawns
 		for i = 1, 8 do
-			arr[i] = Piece:create{x = i - 1, y = offset + mult * 6, dead = false, type = 6, white = white}
+			arr[i] = Piece:create{x = i - 1, y = offset + mult * 6, dead = false, type = 6, white = white, firstMove = true}
 		end
 		--rooks
 		arr[9] = Piece:create{x = 0, y = offset + mult * 7, dead = false, type = 5, white = white}
@@ -77,9 +87,9 @@ function gameLoad(mobile)
 end
 
 --debug
---[[function love.keypressed(key)
-whitesTurn = whitesTurn == 0 and 1 or 0
-end--]]
+function love.keypressed(key)
+	--beingAttackedAt(0, 0)
+end
 
 --clicking/touching implementation
 --[[function love.touchpressed(id, x, y, dx, dy, p)
@@ -90,202 +100,51 @@ function love.mousepressed(x, y, b, isTouch)
 end--]]
 
 --returns the piece at specified x and y coordinate (tile coords)
-function pieceAt(x, y, white)
-	if white == nil or white == true then 
-		for i, piece in ipairs(wpieces) do 
-			if piece.dead == false and piece.x == x and piece.y == y then
-				return piece
-			end
-		end
-	end
-	if white == nil or white == false then
-		for i, piece in ipairs(bpieces) do 
-			if piece.dead == false and piece.x == x and piece.y == y then
-				return piece
-			end
-		end
-	end
-end
 
-function highlightAt(x, y)
-	for i, highlight in ipairs(highlights) do
-		if highlight.x == x and highlight.y == y then 
-			return true
-		end 
-	end 
-	return false 
-end
-
-function gameClicked (fx, fy)
+game.clicked = function (fx, fy)
+	--finds which tile was clicked
 	x = math.floor((fx - xOffs) / 50)
 	y = math.floor((fy - yOffs) / 50)
-	--finds which tile was clicked
-	if highlightAt(x, y) and selectedPiece ~= nil and pieceAt(x, y) ~= selectedPiece then 
-		if pieceAt(x, y) ~= nil and pieceAt(x, y) ~= selectedPiece then 
-			pieceAt(x, y).dead = true 
+	if detection.highlightAt(x, y) and selectedPiece ~= nil and detection.pieceAt(x, y) ~= selectedPiece then 
+		--if theres already a piece at the position you will move to (or if en passant), make that piece dead
+		if detection.pieceAt(x, y) ~= nil and detection.pieceAt(x, y) ~= selectedPiece then 
+			detection.pieceAt(x, y).dead = true 
 		end 
-		--if theres already a piece at the position you will move to, make that piece dead
+		if pawnMoved2Squares ~= nil and selectedPiece.type == 6 and detection.pieceAt(x, y + (selectedPiece.white and 1 or -1), not selectedPiece.white) == pawnMoved2Squares then 
+			detection.pieceAt(x, y + (selectedPiece.white and 1 or -1)).dead = true 
+		end
 		whitesTurn = not whitesTurn
+		--check if a pawn moved 2 squares (for en passant)
+		if selectedPiece.type == 6 and math.abs(y - selectedPiece.y) == 2 then
+			pawnMoved2Squares = selectedPiece
+		else 
+			pawnMoved2Squares = nil
+		end
 		selectedPiece.x = x
 		selectedPiece.y = y
 		highlights = {}
+		selectedPiece.firstMove = false
+		--check if the other player's king is checked
+		detection.isChecked(whitesTurn)
 		selectedPiece = nil
+		
 	else
-		highlights = {}
 		--empties the highlight array
-		highlights[1] = Highlight:create{x = x, y = y}
+		highlights = {}
 		--creates first highlight at clicked piece pos
-		if pieceAt(x, y, whitesTurn) ~= nil then
-			selectedPiece = pieceAt(x, y)
-			createHighlights(pieceAt(x, y))
-			--if theres a piece at the clicked position, create the highlights for that piece
+		highlights[1] = Highlight:create{x = x, y = y}
+		--if theres a piece at the clicked position, create the highlights for that piece
+		if detection.pieceAt(x, y, whitesTurn) ~= nil then
+			selectedPiece = detection.pieceAt(x, y)
+			detection.piecePinned(selectedPiece)
+			detection.createHighlights(selectedPiece, false)
 		else
 			selectedPiece = nil 
 		end
 	end
 end
 
-function createHighlights(piece)
-	--pawn
-	if piece.type == 6 then 
-		pieceIndexOffset = 0
-		if piece.white then
-			yDelta = -1
-			startRow = 6
-		else
-			yDelta = 1
-			startRow = 1
-		end
-		if pieceAt(piece.x, piece.y + yDelta) ~= nil then 
-			pieceIndexOffset = pieceIndexOffset + 1
-		else
-			highlights[2] = Highlight:create{x = piece.x, y = piece.y + yDelta}
-		end
-		if piece.y == startRow and pieceAt(piece.x, piece.y + yDelta) == nil and pieceAt(piece.x, piece.y + yDelta * 2) == nil then 
-			highlights[3 - pieceIndexOffset] = Highlight:create{x = piece.x, y = piece.y + yDelta * 2}
-		else
-			pieceIndexOffset = pieceIndexOffset + 1
-		end 
-		if pieceAt(piece.x - 1, piece.y + yDelta, not piece.white) ~= nil then 
-			highlights[4 - pieceIndexOffset] = Highlight:create{x = piece.x - 1, y = piece.y + yDelta}
-		else 
-			pieceIndexOffset = pieceIndexOffset + 1
-		end
-		if pieceAt(piece.x + 1, piece.y + yDelta, not piece.white) ~= nil then 
-			highlights[5 - pieceIndexOffset] = Highlight:create{x = piece.x + 1, y = piece.y + yDelta}
-		else 
-			pieceIndexOffset = pieceIndexOffset + 1
-		end
-	--rook
-	elseif piece.type == 5 then
-		pieceIndexOffset = 0
-		for li = 1, 4 do
-			x = (li % 2) * (li <= 2 and 1 or -1)
-			y = ((li + 1) % 2) * (li <= 2 and 1 or -1)
-			for i = 1, 7 do
-				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
-					break
-				end
-				highlights[1 + i + ((li - 1) * 7) - pieceIndexOffset] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
-				if pieceAt(piece.x + x * i, piece.y + y * i, not piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i)
-					break
-				end
-			end
-		end
-	--knight
-	elseif piece.type == 4 then
-		pieceIndexOffset = 0
-		for i = 1, 8 do
-			if i <= 4 then
-				if pieceAt(piece.x + ((i % 2) * 2) - 1, piece.y + (i <= 2 and 2 or -2), piece.white) ~= nil then
-					pieceIndexOffset = pieceIndexOffset + 1
-				else
-					highlights[i + 1 - pieceIndexOffset] = Highlight:create{x = piece.x + ((i % 2) * 2) - 1, y = piece.y + (i <= 2 and 2 or -2)}
-				end
-			else
-				if pieceAt(piece.x + (i <= 6 and 2 or -2), piece.y + ((i % 2) * 2) - 1, piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + 1
-				else 
-					highlights[i + 1 - pieceIndexOffset] = Highlight:create{x = piece.x + (i <= 6 and 2 or -2), y = piece.y + ((i % 2) * 2) - 1}
-				end
-			end
-		end
-	--bishop
-	elseif piece.type == 3 then 
-		pieceIndexOffset = 0
-		for li = 1, 4 do
-			x = (li % 2) * 2 - 1
-			y = (li <= 2 and 1 or -1)
-			for i = 1, 7 do
-				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
-					break
-				end
-				highlights[1 + i + ((li - 1) * 7) - pieceIndexOffset] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
-				if pieceAt(piece.x + x * i, piece.y + y * i, not piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i)
-					break
-				end
-			end
-		end
-	--queen
-	elseif piece.type == 2 then
-		--diagonal
-		pieceIndexOffset = 0
-		for li = 1, 4 do
-			x = (li % 2) * (li <= 2 and 1 or -1)
-			y = ((li + 1) % 2) * (li <= 2 and 1 or -1)
-			for i = 1, 7 do
-				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
-					break
-				end
-				highlights[1 + i + ((li - 1) * 7) - pieceIndexOffset] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
-				if pieceAt(piece.x + x * i, piece.y + y * i, not piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i)
-					break
-				end
-			end
-		end
-		--hor/ver
-		for li = 1, 4 do
-			x = (li % 2) * 2 - 1
-			y = (li <= 2 and 1 or -1)
-			for i = 1, 7 do
-				if pieceAt(piece.x + x * i, piece.y + y * i, piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i + 1)
-					break
-				end
-				highlights[29 + i + ((li - 1) * 7) - pieceIndexOffset] = Highlight:create{x = piece.x + x * i, y = piece.y + y * i}
-				if pieceAt(piece.x + x * i, piece.y + y * i, not piece.white) ~= nil then 
-					pieceIndexOffset = pieceIndexOffset + (7 - i)
-					break
-				end
-			end
-		end
-	--king
-	elseif piece.type == 1 then
-		pieceIndexOffset = 0
-		for i = 1, 4 do 
-			if pieceAt(piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, piece.white) ~= nil then 
-				pieceIndexOffset = pieceIndexOffset + 1
-			else
-				highlights[i + 1 - pieceIndexOffset] = Highlight:create{x = piece.x + (i - 1) % 3 - 1, y = piece.y + math.floor((i - 1) / 3) - 1}
-			end
-		end
-		for i = 6, 9 do 
-			if pieceAt(piece.x + (i - 1) % 3 - 1, piece.y + math.floor((i - 1) / 3) - 1, piece.white) ~= nil then 
-				pieceIndexOffset = pieceIndexOffset + 1
-			else
-				highlights[i - pieceIndexOffset] = Highlight:create{x = piece.x + (i - 1) % 3 - 1, y = piece.y + math.floor((i - 1) / 3) - 1}
-			end
-		end
-	end
-end
-
-function gameDraw()
+game.draw = function ()
 	--draws board
 	love.graphics.setColor(0.95, 0.75, 0.6)
 	love.graphics.rectangle("fill", xOffs, yOffs, 400, 400)
@@ -307,7 +166,7 @@ function gameDraw()
 	function drawPieces(arr)
 		for i, piece in ipairs(arr) do
 			if piece.dead == false then
-				love.graphics.draw(sprites, types[piece.type + (piece.white and 0 or 6)], xOffs + (piece.x + (whitesTurn and 0 or 1)) * 50, yOffs + (piece.y + (whitesTurn and 0 or 1)) * 50, (whitesTurn and 0 or 1) * math.pi, 0.25, 0.25)
+				love.graphics.draw(sprites, types[piece.type + (piece.white and 0 or 6)], xOffs + (piece.x + (whitesTurn and 0 or 1) * (mobile and 1 or 0)) * 50, yOffs + (piece.y + (whitesTurn and 0 or 1) * (mobile and 1 or 0)) * 50, (mobile and 1 or 0) * (whitesTurn and 0 or 1) * math.pi, 0.25, 0.25)
 			end
 		end
 	end
@@ -319,3 +178,5 @@ function gameDraw()
 	drawPieces(bpieces)
 	love.graphics.print( tostring(txt) )
 end
+
+return game
