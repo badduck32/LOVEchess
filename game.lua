@@ -2,18 +2,18 @@ detection = require("detection")
 
 local game = {}
 
-game.load = function (mobile)
+--ss stands for square size
+local xoffs, yoffs, w, h, ss
+
+function resized()
+	xoffs, yoffs, w, h = love.window.getSafeArea()
+	ss = w/8
+	yoffs = yoffs + (h/2) - (ss*4)
+end
+
+function game.load()
 	txt = ""
-	mobile = mobile
-	if mobile == false then
-		love.window.setMode(400, 400, {resizable = false} )
-		xOffs = 0
-		yOffs = 0
-	else
-		love.window.setMode(411, 450, {resizable = false} )
-		xOffs = 5
-		yOffs = 50
-	end
+	resized()
 	whitesTurn = true
 	sprites = love.graphics.newImage("images/chess_pieces.png")
 	types = {}
@@ -103,8 +103,8 @@ end--]]
 
 game.clicked = function (fx, fy)
 	--finds which tile was clicked
-	x = math.floor((fx - xOffs) / 50)
-	y = math.floor((fy - yOffs) / 50)
+	x = math.floor((fx - xoffs) / ss)
+	y = math.floor((fy - yoffs) / ss)
 	if detection.highlightAt(x, y) and selectedPiece ~= nil and detection.pieceAt(x, y) ~= selectedPiece then 
 		--if theres already a piece at the position you will move to (or if en passant), make that piece dead
 		if detection.pieceAt(x, y) ~= nil and detection.pieceAt(x, y) ~= selectedPiece then 
@@ -147,12 +147,12 @@ end
 game.draw = function ()
 	--draws board
 	love.graphics.setColor(0.95, 0.75, 0.6)
-	love.graphics.rectangle("fill", xOffs, yOffs, 400, 400)
+	love.graphics.rectangle("fill", xoffs, yoffs, w, w)
 	love.graphics.setColor(0.875, 0.6, 0.5)
 	for x = 0,7 do
 		for y = 0, 7 do
 			if (x + y) % 2 == 1 then
-				love.graphics.rectangle("fill", x * 50 + xOffs, y * 50 + yOffs, 50, 50)
+				love.graphics.rectangle("fill", x * ss + xoffs, y * ss + yoffs, ss, ss)
 			end
 		end
 	end
@@ -160,13 +160,13 @@ game.draw = function ()
 	--draws highlight squares
 	love.graphics.setColor(0.95, 0.85, 0.1, 0.5)
 	for i, square in ipairs(highlights) do
-		love.graphics.rectangle("fill", xOffs + square.x * 50, yOffs + square.y * 50, 50, 50)
+		love.graphics.rectangle("fill", xoffs + square.x * ss, yoffs + square.y * ss, ss, ss)
 	end
 
 	function drawPieces(arr)
 		for i, piece in ipairs(arr) do
 			if piece.dead == false then
-				love.graphics.draw(sprites, types[piece.type + (piece.white and 0 or 6)], xOffs + (piece.x + (whitesTurn and 0 or 1) * (mobile and 1 or 0)) * 50, yOffs + (piece.y + (whitesTurn and 0 or 1) * (mobile and 1 or 0)) * 50, (mobile and 1 or 0) * (whitesTurn and 0 or 1) * math.pi, 0.25, 0.25)
+				love.graphics.draw(sprites, types[piece.type + (piece.white and 0 or 6)], xoffs + (piece.x + (whitesTurn and 0 or 1)) * ss, yoffs + (piece.y + (whitesTurn and 0 or 1)) * ss, (whitesTurn and 0 or 1) * math.pi, w/200/8, w/200/8)
 			end
 		end
 	end
