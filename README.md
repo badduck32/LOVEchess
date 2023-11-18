@@ -1,12 +1,12 @@
 # LÖVEchess
 
-LÖVEchess is a chess game made entirely in [LÖVE2D](https://love2d.org/) (the game is currently not finished yet).
+LÖVEchess is a chess game made entirely in [LÖVE](https://love2d.org/) (the game is currently not finished yet).
 
 ![](images/LÖVEchess_preview.png)
 
 ## How to play
 
-To play my game you first need to download [LÖVE2D](https://love2d.org/) on your device. With that installed, open the [build.love](https://github.com/badduck32/LOVEchess/blob/main/firstbuild.love) file in LÖVE2D.
+To play my game you first need to download [LÖVE](https://love2d.org/) on your device. With that installed, open the [build.love](https://github.com/badduck32/LOVEchess/blob/main/firstbuild.love) file in LÖVE.
 
 ## Features
 
